@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Typography, Button, Form, message, Input, Icon } from 'antd';
 import FileUpload from '../../utils/FileUpload';
+import Axios from 'axios';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -15,7 +16,7 @@ const continents = [
     { key: 7, value: "Antarctica" }
 ]
 
-function UploadProductPage() {
+function UploadProductPage(props) {
 
     const [TitleValue, setTitleValue] = useState("");
     const [DescriptionValue, setDescriptionValue] = useState("");
@@ -36,6 +37,32 @@ function UploadProductPage() {
 
     }
 
+    const onSubmit = (event) => {
+        event.preventDefault();
+
+        if (!TitleValue || !DescriptionValue || !PriceValue || !images || !continents) return alert("Please fill out all the fields!")
+
+        const variables = {
+            writer: props.user.userData._id,
+            title: TitleValue,
+            description: DescriptionValue,
+            price: PriceValue,
+            images: images,
+            continents: ContinentValue
+        }
+
+        Axios.post('/api/products/uploadProduct', variables)
+            .then(res => {
+                if (res.data.success) {
+                    alert('Product Successfully Uploaded')
+                    props.history.push('/')
+
+                } else {
+                    alert('Failed to upload Product')
+                }
+            })
+    }
+
     return (
         <div style={{ maxWidth: '700px', margin: '2rem auto' }}>
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -43,7 +70,7 @@ function UploadProductPage() {
 
             </div>
 
-            <Form onSubmit>
+            <Form onSubmit={onSubmit}>
 
                 <FileUpload refreshFunction={updateimages} />
                 <br />
@@ -78,7 +105,7 @@ function UploadProductPage() {
                 </select>
                 <br />
                 <br />
-                <Button onClick>Submit</Button>
+                <Button onClick={onSubmit}>Submit</Button>
             </Form>
         </div>
     )
